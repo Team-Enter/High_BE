@@ -162,6 +162,47 @@ app.post('/user/logout', async (req, res) => {
   
 });  
 
+app.get('/user/info', async (req, res) => {
+    const authHeader = req.headers.authorization;
+  
+    try {
+  
+      if (!authHeader) {
+        return res.status(401).json({ message: '토큰이 유효하지 않습니다.' });
+      }
+  
+      const token = authHeader.split(' ')[1];
+  
+      const decodedToken = jwt.verify(token, process.env.SECRET);
+  
+      const accountId = decodedToken.accountId;
+  
+      const thisUser = await User.findOne({ 
+        where: { accountId },
+        attributes: { exclude: ["id", "password", "token"] },
+      });
+  
+      if (!thisUser) {
+        return res.status(404).json({ message: "'유저를 찾을 수 없습니다.'" });
+      }
+  
+      res.json({ 
+        accountId: thisUser.accountId,
+        nickname: thisUser.nickname,
+        email: thisUser.email
+      });
+  
+    } catch (err) {
+      console.log(err);
+  
+      return res.status(500).json({
+        message: "서버 에러",
+      });
+  
+    }
+  
+});
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {

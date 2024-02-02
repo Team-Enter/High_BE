@@ -120,6 +120,48 @@ app.post('/user/login', async (req, res) => {
     }
 });
 
+app.post('/user/logout', async (req, res) => {
+    const authHeader = req.headers.authorization;
+  
+    try {
+  
+      if(!authHeader) {
+        return res.status(401).json({ message: "인증 토큰이 없습니다." });
+      }
+  
+      const token = authHeader.split(' ')[1];
+  
+      const decodedToken = jwt.verify(token, process.env.SECRET);
+  
+      const accountId = decodedToken.accountId;
+  
+      const thisUser = await User.findOne({ where: { accountId } });
+  
+      if (!thisUser) {
+        return res.status(404).json({
+          message: "요청한 페이지를 찾을 수 없습니다.",
+        });
+      }
+  
+      await thisUser.update({
+        token: null,
+      });
+  
+      return res.status(204).json({
+        message: "서버에서 정상적인 변경 또는 삭제 처리가 이루어졌지만, 새롭게 보일 정보가 없습니다.",
+      });
+      
+    } catch (err) {
+      console.log(err);
+  
+      return res.status(500).json({
+        message: "서버 에러",
+      });
+  
+    }
+  
+});  
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {

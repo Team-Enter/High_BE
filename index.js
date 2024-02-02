@@ -35,6 +35,46 @@ const User = sequelize.define('User', {
     timestamps: false
 });
 
+const app = express();
+app.use(express.json());
+
+//user
+
+app.post('/user/signup', async (req, res) => {
+
+  const { accountId, nickname, password, email } = req.body;
+
+  console.log(req.body);
+
+  try {
+
+    const thisUser = await User.findOne({ where: { accountId } });
+
+    if (thisUser) {
+      return res.status(409).json({
+        message: "유저 아이디가 이미 존재합니다.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({ 
+        accountId: accountId,
+        nickname: nickname,
+        password: hashedPassword,
+        email: email
+    });
+
+    res.status(201).json("성공적으로 자원을 생성하였습니다.");
+
+  } catch (error) {
+
+    console.error(error);
+    res.status(500).json({ message: "서버 오류" });
+
+  }
+});
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {

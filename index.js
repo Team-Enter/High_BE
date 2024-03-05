@@ -290,7 +290,7 @@ app.post('/feeds/insert', async (req, res) => {
 
 //고등학교 추천
 app.get('/feeds', async (req, res) => {
-  const { firstresult, secondresult } = req.body;
+  const { firstresult, secondresult } = req.query;
   
   const authHeader = req.headers.authorization;
 
@@ -342,7 +342,7 @@ app.get('/feeds', async (req, res) => {
 
 //고등학교 정보 조회
 app.get('/feeds/info', async (req, res) => {
-  const { name } = req.body;
+  const { name } = req.query;
   
   const authHeader = req.headers.authorization;
 
